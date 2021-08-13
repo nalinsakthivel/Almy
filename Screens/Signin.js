@@ -5,6 +5,7 @@ import {
   View,
   TextInput,
   Dimensions,
+  StatusBar,
   ToastAndroid,
   TouchableOpacity,
 } from 'react-native';
@@ -88,6 +89,7 @@ const Signin = () => {
 
   return (
     <View style={styles.viewContainer}>
+      <StatusBar backgroundColor={colours.back} barStyle='dark-content' />
       <Text style={styles.signupText}>Sign In</Text>
       <View style={styles.iconTextinput}>
         <Icon
@@ -226,9 +228,9 @@ const styles = StyleSheet.create({
     width: screenWidth * 0.87,
     height: 20,
     margin: 0,
-    transform: [{ translateX: -10 }],
-    paddingLeft: 10,
-    marginBottom: 10,
+    // transform: [{ translateX: -10 }],
+    paddingLeft: 5,
+    marginBottom: 20,
   },
   error: { color: colours.red, fontSize: 10 },
   checkboxContainer: {

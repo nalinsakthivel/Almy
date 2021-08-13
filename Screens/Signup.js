@@ -5,6 +5,7 @@ import {
   TextInput,
   View,
   Dimensions,
+  StatusBar,
   TouchableOpacity,
   ToastAndroid,
 } from 'react-native';
@@ -98,7 +99,9 @@ const Signup = () => {
     [setShowpswd(showpswd => !showpswd)];
   };
   return (
+
     <View style={styles.viewContainer} onPress={() => console.log('Pressed')}>
+      <StatusBar backgroundColor={colours.back} barStyle='dark-content' />
       <Text style={styles.signupText}>Sign Up</Text>
       <View style={styles.iconTextinput}>
         <Icon
@@ -278,7 +281,7 @@ const styles = StyleSheet.create({
 
     height: 20,
     marginTop: 10,
-
+    marginBottom: 10,
     paddingLeft: 20,
   },
   error: { color: colours.red, fontSize: 10 },
