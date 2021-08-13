@@ -3,18 +3,29 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import {colours} from '../Constants';
+
+import { colours } from '../Constants';
 const screenWidth = Dimensions.get('window').width;
-const Button = ({name, onPress, style}) => {
+const Button = ({ name, onPress, style, value }) => {
+  if (value) {
+    return (<View style={{ ...styles.touchContainer, ...style }}>
+      <ActivityIndicator size='small' color={colours.white} />
+    </View>
+    )
+  }
   return (
-    <TouchableOpacity
-      style={{...styles.touchContainer, ...style}}
-      onPress={onPress}>
-      <Text style={styles.text}>{name}</Text>
-    </TouchableOpacity>
+    <View>
+      <TouchableOpacity
+        style={{ ...styles.touchContainer, ...style }}
+        onPress={onPress}>
+        <Text style={styles.text}>{name}</Text>
+
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -32,7 +43,8 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   text: {
-    fontWeight: 'bold',
+    fontFamily: 'Nunito-Black',
+
     color: colours.white,
   },
 });

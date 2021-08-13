@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   ScrollView,
@@ -6,17 +6,21 @@ import {
   Text,
   Image,
   View,
+  StatusBar,
   TouchableOpacity,
   SafeAreaView,
+
   FlatList,
   ToastAndroid,
 } from 'react-native';
 import Seperator from '../Components/Seperater';
 import Button from '../Components/Button';
-import {useNavigation} from '@react-navigation/native';
-import {CommonActions} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {colours} from '../Constants';
+import { colours } from '../Constants';
+import auth from '@react-native-firebase/auth';
+
 const screenWidth = Dimensions.get('window').width;
 
 const Useeffects = () => {
@@ -24,6 +28,8 @@ const Useeffects = () => {
   const [startCount, setstartCount] = useState(0);
   const [datas, setDatas] = useState([]);
   const [back, setBack] = useState(datas.completed);
+
+
   const getData = async startCount => {
     let result = await fetch(
       `http://jsonplaceholder.typicode.com/photos?_start=${startCount}&_limit=10`,
@@ -39,12 +45,26 @@ const Useeffects = () => {
   useEffect(() => {
     getData(startCount);
   }, []);
+
+
   const onEndreach = () => {
-    getData(startCount);
+    // getData(startCount);
   };
+
+
+  const onLogout = async () => {
+    await auth().signOut()
+    return navigation.dispatch(
+      CommonActions.reset({
+        index: 1,
+        routes: [{ name: 'Signin' }],
+      }))
+  }
+
 
   return (
     <View style={styles.mainContainer}>
+      <StatusBar backgroundColor={colours.violet} barStyle='light-content' />
       <FlatList
         onEndReached={onEndreach}
         contentContainerStyle={styles.container}
@@ -52,41 +72,31 @@ const Useeffects = () => {
         ListHeaderComponent={<Text style={styles.headerText}>FlatList</Text>}
         ListFooterComponentStyle={styles.footerContainer}
         ListFooterComponent={
-          <TouchableOpacity
-            onPress={async () =>
-              navigation.dispatch(
-                CommonActions.reset({
-                  index: 1,
-                  routes: [{name: 'Signin'}],
-                }),
-                await AsyncStorage.removeItem('credentials'),
-                ToastAndroid.show(
-                  'Logout Sucessfull',
-                  ToastAndroid.SHORT,
-                  ToastAndroid.BOTTOM,
-                ),
-              )
-            }>
-            <Text style={styles.headerText}>Signout</Text>
-          </TouchableOpacity>
+          <View>
+            < TouchableOpacity
+              onPress={onLogout}
+            >
+              <Text style={styles.headerText}>Signout</Text>
+            </TouchableOpacity></View>
+
         }
         horizontal={false}
-        numColumns={2}
+        numColumns={1}
         data={datas}
         keyExtractor={item => item.id}
-        renderItem={({item}) => (
+        renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => navigation.push('effectsnav', {data: item})}
+            onPress={() => navigation.push('effectsnav', { data: item })}
             style={styles.dataContainer}>
             <View style={styles.imageView}>
               <Image
                 style={styles.imageContainer}
-                source={{uri: 'https://picsum.photos/id/1006/3000/2000'}}
+                source={{ uri: 'https://picsum.photos/id/1006/3000/2000' }}
               />
             </View>
             <View style={styles.textView}>
               <Text style={styles.idText}>ID: {item.id}</Text>
-              <Text numberOfLines={1}>{item.title}</Text>
+              <Text style={styles.titleText} numberOfLines={1}>{item.title}</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -99,35 +109,38 @@ export default Useeffects;
 
 const styles = StyleSheet.create({
   mainContainer: {
-    flex: 1,
+    // flex: 1,
+    // flexGrow: 1,
   },
   container: {
-    flexGrow: 1,
+    // flexGrow: 1,
     alignItems: 'center',
     // justifyContent: 'center',
   },
   dataContainer: {
-    width: screenWidth * 0.4,
-    height: 150,
+    width: screenWidth * 0.87,
+    height: 230,
     marginRight: 15,
     marginBottom: 10,
     marginLeft: 15,
     marginTop: 10,
     elevation: 10,
-    // borderRadius: 5,
+    borderRadius: 5,
     flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: colours.white,
     justifyContent: 'space-between',
   },
   headerText: {
-    fontWeight: 'bold',
+    fontFamily: 'Nunito-Black',
     fontSize: 22,
+
+
     color: colours.white,
   },
   headerContainer: {
     width: '100%',
-    height: 60,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
     borderBottomRightRadius: 7,
@@ -141,14 +154,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderTopRightRadius: 7,
     borderTopLeftRadius: 7,
+    fontFamily: 'Nunito-Black',
     // borderBottomRightRadius: 5,
     // borderBottomLeftRadius: 5,
     backgroundColor: colours.violet,
   },
   imageContainer: {
+    borderRadius: 5,
+    borderBottomRightRadius: 0,
+    borderBottomLeftRadius: 0,
     // overflow: 'hidden',
-    width: 158,
-    height: 80,
+    width: screenWidth * 0.87,
+    height: 150,
   },
   imageView: {
     alignItems: 'flex-start',
@@ -162,6 +179,10 @@ const styles = StyleSheet.create({
     //     justifyContent: 'space-between',
   },
   idText: {
-    fontWeight: 'bold',
+    fontFamily: 'Nunito-Black',
+
   },
+  titleText: {
+    fontFamily: 'Nunito-Regular',
+  }
 });

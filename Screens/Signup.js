@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,23 +10,26 @@ import {
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {colours, emailRegex} from '../Constants';
+import { colours, emailRegex } from '../Constants';
 import Button from '../Components/Button';
+import auth from '@react-native-firebase/auth';
 const screenWidth = Dimensions.get('window').width;
 
 const Signup = () => {
+  const [loading, setLoading] = useState(false)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [pswd, setPswd] = useState('');
   const [showpswd, setShowpswd] = useState(false);
-  const [errors, setErrors] = useState({name: [], email: [], pswd: []});
+  const [errors, setErrors] = useState({ name: [], email: [], pswd: [], general: [] });
   const navigation = useNavigation('');
 
   const onRegister = async () => {
     const validation = {};
-    setErrors({name: [], email: [], pswd: []});
+
+    setErrors({ name: [], email: [], pswd: [], general: [] });
     if (name.length < 1) {
       validation['name'] = ['Enter valid name'];
     }
@@ -43,25 +46,52 @@ const Signup = () => {
 
     if (Object.keys(validation).length > 0) {
       setErrors(err => {
-        return {...err, ...validation};
+        return { ...err, ...validation };
       });
+      setLoading(
+        false
+      )
     } else {
+      setLoading(true)
       console.log(`email`, email);
       console.log(`pswd`, pswd);
-      await AsyncStorage.setItem(
-        'credentials',
-        JSON.stringify({
-          emailadd: email,
+      auth()
 
-          paswd: pswd,
-        }),
-      );
-      ToastAndroid.show(
-        'Sigup sucessful',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-      );
-      navigation.push('Signin');
+        .createUserWithEmailAndPassword(email, pswd)
+
+        .then((result) => {
+          console.log(`result`, result)
+          setLoading(false)
+          ToastAndroid.show(
+            'Sigup sucessful',
+            ToastAndroid.SHORT,
+            ToastAndroid.BOTTOM); navigation.push('Signin');
+          // console.log('User account created & signed in!');
+        })
+        .catch(error => {
+          console.log(`error`, error)
+          setLoading(true)
+          // console.log(1, error.code)
+          // console.log(2, error.code.toString())
+          if (error.code === 'auth/email-already-in-use') {
+            validation['general'] = ['That email address is already in use'];
+
+          }
+          if (error.code === 'auth/weak-password') {
+            validation['general'] = ["Password is two small \n Must 6 or 8 Charactersn"];
+
+          }
+          setLoading(false)
+          setErrors(err => {
+            return { ...err, ...validation };
+          });
+
+
+        });
+
+
+
+
     }
   };
   const onShowpswd = () => {
@@ -75,7 +105,7 @@ const Signup = () => {
           name="user-circle"
           size={30}
           color={colours.violet}
-          style={{paddingLeft: 10}}
+          style={{ paddingLeft: 10 }}
         />
         <TextInput
           style={styles.nameinputContainer}
@@ -85,6 +115,7 @@ const Signup = () => {
           autoCapitalize="sentences"
           autoCorrect
           placeholder="Name"
+
           placeholderTextColor={colours.gray}
         />
       </View>
@@ -102,7 +133,7 @@ const Signup = () => {
           name="envelope-square"
           size={30}
           color={colours.violet}
-          style={{paddingLeft: 13}}
+          style={{ paddingLeft: 13 }}
         />
         <TextInput
           style={styles.emailinputContainer}
@@ -129,7 +160,7 @@ const Signup = () => {
           name="lock"
           size={30}
           color={colours.violet}
-          style={{paddingLeft: 15}}
+          style={{ paddingLeft: 15 }}
         />
         <TextInput
           style={styles.pswdinputContainer}
@@ -139,13 +170,13 @@ const Signup = () => {
           autoCapitalize="none"
           autoCorrect
           placeholder="Password"
-          placeholderTextColor={colours.black}
+          placeholderTextColor={colours.gray}
         />
         <Icon
           name={showpswd ? 'eye' : 'eye-slash'}
           size={30}
           color={colours.violet}
-          style={{paddingRight: 15}}
+          style={{ paddingRight: 20 }}
           onPress={onShowpswd}
         />
       </View>
@@ -161,21 +192,31 @@ const Signup = () => {
       <View style={styles.checkboxContainer}>
         <CheckBox
           style={styles.checkBox}
-          tintColors={{true: colours.violet, false: 'black'}}
+          tintColors={{ true: colours.violet, false: 'black' }}
         />
         <Text style={styles.ctextContainer}>
           I have agree in Terms and Conditons
         </Text>
       </View>
+      <View style={styles.generalerror}>
+        {console.log(`error`, errors.general)}
+        {errors.general.map(error => {
+          return (
+            <Text numberOfLines={2} style={styles.error} key={error}>
+              {error}
+            </Text>
+          );
+        })}
+      </View>
       <View style={styles.buttonContainer}>
-        <Button name="Create Account" onPress={onRegister} />
+        <Button name="Create Account" onPress={onRegister} value={loading} />
       </View>
       <View style={styles.textcontainer}>
         <Text style={styles.alreadyText}>Already have an Account </Text>
         <TouchableOpacity
           style={styles.sText}
           onPress={() => navigation.push('Signin')}>
-          <Text>Sign In</Text>
+          <Text style={styles.signText}>Sign In</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -191,8 +232,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   signupText: {
+    fontFamily: 'Nunito-Bold',
     fontSize: 22,
-    fontWeight: 'bold',
+
     color: colours.black,
     marginBottom: 40,
   },
@@ -209,26 +251,26 @@ const styles = StyleSheet.create({
   },
   nameinputContainer: {
     height: 40,
-
+    color: colours.pureblack,
     paddingLeft: 10,
-
+    fontFamily: 'Nunito-Black',
     // borderColor: colours.gray,
     width: screenWidth * 0.87,
   },
   emailinputContainer: {
     height: 40,
-
+    color: colours.pureblack,
     paddingLeft: 13,
-
+    fontFamily: 'Nunito-Black',
     // borderColor: colours.gray,
     width: screenWidth * 0.87,
   },
   pswdinputContainer: {
-    width: '80%',
+    width: '70%',
     height: 40,
-
+    fontFamily: 'Nunito-Regular',
     paddingLeft: 15,
-
+    color: colours.pureblack,
     // borderColor: colours.gray,
   },
   errorContainer: {
@@ -239,7 +281,7 @@ const styles = StyleSheet.create({
 
     paddingLeft: 20,
   },
-  error: {color: colours.red, fontSize: 10},
+  error: { color: colours.red, fontSize: 10 },
   checkboxContainer: {
     flexDirection: 'row',
   },
@@ -247,22 +289,38 @@ const styles = StyleSheet.create({
     borderColor: colours.lightgray,
   },
   ctextContainer: {
+    fontFamily: 'Nunito-Bold',
     marginTop: 5,
     color: colours.lightgray,
   },
+  generalerror: {
+    width: screenWidth * 0.87,
+    height: 40,
+    margin: 0,
+    // transform: [{ translateX: -10 }],
+    paddingLeft: 110,
+    marginBottom: 0,
+  },
   buttonContainer: {
-    marginTop: 20,
+    marginTop: 3e40,
   },
   textcontainer: {
     marginTop: 20,
     flexDirection: 'row',
   },
   alreadyText: {
+    fontFamily: 'Nunito-Italic',
     color: colours.lightgray,
   },
   sText: {
-    fontWeight: 'bold',
+
+
+
+  },
+  signText: {
+    fontFamily: 'Nunito-Bold',
+
     color: colours.violet,
     textDecorationLine: 'underline',
-  },
+  }
 });
