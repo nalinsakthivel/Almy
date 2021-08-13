@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     width: screenWidth * 0.87,
 
     height: 20,
-    margin: 0,
+    marginTop: 10,
 
     paddingLeft: 20,
   },
