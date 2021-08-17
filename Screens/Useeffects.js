@@ -13,7 +13,7 @@ import {
   FlatList,
   ToastAndroid,
 } from 'react-native';
-import Seperator from '../Components/Seperater';
+import { useRoute } from '@react-navigation/native';
 import Button from '../Components/Button';
 import { useNavigation } from '@react-navigation/native';
 import { CommonActions } from '@react-navigation/native';

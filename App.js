@@ -10,6 +10,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Changing from './Screens/Changing';
 import Effects from './Screens/Effects';
+import ImageProps from './Screens/ImageProps'
 import Useeffects from './Screens/Useeffects';
 import Effectsnav from './Screens/Effectsnav';
 import RNBootSplash from 'react-native-bootsplash'
@@ -64,9 +65,11 @@ const App = () => {
 
           <Stack.Screen name="effects" component={Useeffects} />
           <Stack.Screen name="effectsnav" component={Effectsnav} />
+          <Stack.Screen name="ImageProps" component={ImageProps} />
           <Stack.Screen name="Signup" component={Signup} />
           <Stack.Screen name="Signin" component={Signin} />
           <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
+
 
         </Stack.Navigator>
       ) : (
@@ -79,6 +82,8 @@ const App = () => {
           <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
           <Stack.Screen name="effects" component={Useeffects} />
           <Stack.Screen name="effectsnav" component={Effectsnav} />
+          <Stack.Screen name="ImageProps" component={ImageProps} />
+
         </Stack.Navigator>
       )}
     </NavigationContainer>

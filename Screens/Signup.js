@@ -66,7 +66,8 @@ const Signup = () => {
           ToastAndroid.show(
             'Sigup sucessful',
             ToastAndroid.SHORT,
-            ToastAndroid.BOTTOM); navigation.push('Signin');
+            ToastAndroid.BOTTOM);
+          navigation.push('Signin');
           // console.log('User account created & signed in!');
         })
         .catch(error => {

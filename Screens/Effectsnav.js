@@ -10,16 +10,21 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Button from '../Components/Button'
+import storage from '@react-native-firebase/storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useRoute } from '@react-navigation/native';
 import { colours } from '../Constants';
+import ImageCropper from 'react-native-advance-image-cropper';
+
 const screenWidth = Dimensions.get('window').width;
 const Effectsnav = () => {
+
+
   const route = useRoute();
   const navigation = useNavigation();
 
   const { data } = route.params;
-  console.log(`data`, data);
+
   const [photo, setPhoto] = useState()
   const [arrdatas, setArrdatas] = useState([]);
   const getData = async () => {
@@ -32,18 +37,44 @@ const Effectsnav = () => {
   };
 
   const option = {
-    mediaType: 'photo'
+    mediaType: 'mixed',
+    videoQuality: 'low',
+    cameraType: 'back'
+  }
 
+
+  const onHandlePhoto = (response) => {
+    console.log(`response.uri`, response.assets[0])
+    if (response.assets[0].uri) {
+      setPhoto(response.assets[0].uri);
+      navigation.push('ImageProps', { photo: response.assets[0].uri, setPhoto })
+    }
+  }
+
+  const onCamera = () => {
+    launchCamera(option, onHandlePhoto);
   }
 
   const onPhoto = () => {
-    launchImageLibrary(option, (response) => {
-      console.log(`response.uri`, response.assets[0])
-      if (response.assets[0].uri) {
-        setPhoto(response.assets[0].uri);
-      }
-    });
+
+    launchImageLibrary(option, onHandlePhoto);
   }
+
+
+  const onUpload = async () => {
+    console.log(`photo`, photo)
+    const patharr = photo.split('/')
+    const pathToFile = patharr[patharr.length - 1]
+    const extension = pathToFile.split('.')[1]
+    console.log(`patharr`, patharr)
+    console.log(`pathToFile`, pathToFile)
+    const reference = storage().ref(`/images/${arrdatas.id}.${extension}`)
+
+    const res = await reference.putFile(photo);
+    console.log(`res`, res)
+  }
+
+
   useEffect(() => {
     getData();
   }, []);
@@ -62,10 +93,17 @@ const Effectsnav = () => {
               uri: photo
             }}
           />
+
           : <Text style={styles.photoText}>Select a Photo</Text>}
       </View>
       <View style={styles.chooseContainer}>
-        <Button name='Choose Photo' onPress={onPhoto} />
+        <Button name='Choose Media From Camera' onPress={onCamera} />
+      </View>
+      <View style={styles.chooseCamera}>
+        <Button name='Choose Media From Gallery' onPress={onPhoto} />
+      </View>
+      <View style={styles.uploadContainer}>
+        <Button name='Upload' onPress={onUpload} />
       </View>
       <View
         style={styles.dataContainer}>
@@ -93,6 +131,7 @@ export default Effectsnav;
 const styles = StyleSheet.create({
   container: { flex: 1 },
   dataContainer: {
+    transform: [{ translateY: -70 }],
     width: screenWidth * 0.87,
     height: 80,
     marginLeft: 35,
@@ -130,6 +169,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
     margin: 25
   },
+  chooseCamera: {
+    transform: [{ translateY: -40 }],
+    margin: 25
+  },
+  uploadContainer: {
+    transform: [{ translateY: -80 }],
+    margin: 25
+  },
   sText: {
 
     width: screenWidth * 0.87,
@@ -142,12 +189,13 @@ const styles = StyleSheet.create({
     // textDecorationLine: 'underline',
   },
   backButton: {
+    transform: [{ translateY: -90 }],
     fontFamily: 'Nunito-Bold',
     color: colours.violet,
     textDecorationLine: 'underline',
   },
   idText: {
-    marginTop: 40,
+    marginTop: 0,
     fontFamily: 'Nunito-ExtraBold',
     color: colours.violet,
     marginBottom: 5,
